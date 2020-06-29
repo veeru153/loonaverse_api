@@ -5,6 +5,7 @@ const { ltv, eras } = require('../models/ltv');
 module.exports.getList = () => new Promise(async (resolve, reject) => {
     let allEps = [];
     for (const era in eras) {
+        if(eras[era] == 'profile') continue;
         let eraEps = await ltv[eras[era]].find();
         allEps = [...allEps, ...eraEps]
     }

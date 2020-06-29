@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { ltv } = require('../models/ltv');
+const { ltv, eras } = require('../models/ltv');
 const { getList, filterMonth, filterDate, filterYear } = require('./utilities');
 
 
@@ -37,6 +37,7 @@ router.get('/', async (req, res) => {
     }
 
     if(Object.keys(req.query).length == 0 || req.query.page && !errorThrown) {
+        console.log(req.query);
         let page = req.query.page ? parseInt(req.query.page) : 0;
         epList = epList.slice(50*page, 50*(page+1));
     }
@@ -45,8 +46,12 @@ router.get('/', async (req, res) => {
 })
 
 router.get('/era/:era', async (req, res) => {
-    let episodes = await ltv[req.params.era].find();
-    res.send(episodes)
+    if(eras.includes(req.params.era)) {
+        let episodes = await ltv[req.params.era].find();
+        res.send(episodes)
+    } else {
+        res.status(400).send({ err: 'Invalid Era!'})
+    }
 })
 
 router.get('/member/:member', async (req, res) => {
@@ -59,6 +64,7 @@ router.get('/member/:member', async (req, res) => {
     } else {
         memberEpisodes = episodes.filter(ep => ep.members.toLowerCase().includes(member) || ep.blurred.toLowerCase().includes(member));
     }
+    memberEpisodes.sort( (a,b) => a.id - b.id)
     res.send(memberEpisodes);
 })
 
